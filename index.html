@@ -1,0 +1,471 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Reservas · Nohel Coffee House</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,650&family=DM+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg:#f6f1ea; --card:#fffdf9; --ink:#2f2119; --muted:#7a685c; --line:#e6dccf;
+    --accent:#a8672f; --accent-ink:#fff; --accent-soft:#f3e4d3;
+    --bday:#b8466a; --bday-soft:#f8e3ea; --carta:#3f6b5a; --carta-soft:#e1efe8;
+    --danger:#b3412e; --radius:14px;
+  }
+  *{box-sizing:border-box}
+  html,body{margin:0;background:var(--bg);color:var(--ink);font-family:"DM Sans",system-ui,sans-serif;font-size:15px;line-height:1.45}
+  header{padding:22px 28px 6px;display:flex;align-items:baseline;gap:14px;flex-wrap:wrap}
+  header h1{font-family:Fraunces,Georgia,serif;font-weight:650;font-size:28px;margin:0;letter-spacing:-.01em}
+  header .sub{color:var(--muted);font-size:14px}
+  .authbtn{padding:6px 12px;font-size:13px}
+  .ro-note{margin-left:auto;font-size:13px;color:var(--muted);background:var(--card);border:1px solid var(--line);padding:5px 11px;border-radius:999px;display:none}
+  main{display:grid;grid-template-columns:minmax(300px,380px) 1fr;gap:24px;padding:16px 28px 40px;align-items:start}
+  main.readonly{grid-template-columns:1fr}
+  main.readonly #formCol{display:none}
+  .panel{background:var(--card);border:1px solid var(--line);border-radius:var(--radius);padding:20px}
+  #formCol{position:sticky;top:16px}
+  h2{font-family:Fraunces,Georgia,serif;font-weight:650;font-size:19px;margin:0 0 14px}
+  label{display:block;font-size:13px;font-weight:600;color:var(--muted);margin:12px 0 5px}
+  input,select,textarea{width:100%;font:inherit;color:var(--ink);background:#fff;border:1px solid var(--line);border-radius:10px;padding:10px 12px;outline:none}
+  input:focus,select:focus,textarea:focus{border-color:var(--accent);box-shadow:0 0 0 3px var(--accent-soft)}
+  textarea{resize:vertical;min-height:72px}
+  .row{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+  .hint{font-size:12.5px;color:var(--muted);margin-top:6px;min-height:18px}
+  .seg{display:grid;grid-template-columns:1fr 1fr;gap:6px;background:var(--bg);padding:4px;border-radius:12px;border:1px solid var(--line)}
+  .seg input{display:none}
+  .seg label{margin:0;text-align:center;padding:9px 6px;border-radius:9px;cursor:pointer;color:var(--muted);font-size:14px}
+  .seg input:checked+label.b{background:var(--bday);color:#fff}
+  .seg input:checked+label.c{background:var(--carta);color:#fff}
+  .actions{display:flex;gap:8px;margin-top:18px}
+  button{font:inherit;font-weight:600;border:0;border-radius:10px;padding:11px 16px;cursor:pointer}
+  .primary{background:var(--accent);color:var(--accent-ink);flex:1}
+  .primary:disabled{opacity:.55;cursor:default}
+  .ghost{background:transparent;border:1px solid var(--line);color:var(--ink)}
+  .msg{font-size:13.5px;margin-top:10px;min-height:20px}
+  .msg.ok{color:var(--carta)} .msg.err{color:var(--danger)}
+  details.fer{margin-top:18px;border-top:1px solid var(--line);padding-top:12px}
+  details.fer summary{cursor:pointer;font-size:13.5px;font-weight:600;color:var(--muted)}
+  .ferlist{list-style:none;padding:0;margin:10px 0 0;max-height:180px;overflow:auto;font-size:13.5px}
+  .ferlist li{display:flex;justify-content:space-between;align-items:center;padding:5px 0;border-bottom:1px dashed var(--line)}
+  .ferlist button{padding:2px 8px;font-size:12px;background:transparent;color:var(--danger)}
+  .feradd{display:grid;grid-template-columns:1fr 1fr auto;gap:6px;margin-top:8px}
+  .feradd input{padding:7px 9px;font-size:13.5px}
+  .feradd button{padding:7px 10px;font-size:13px;background:var(--accent-soft);color:var(--accent)}
+
+  .listhead{display:flex;align-items:center;gap:12px;margin-bottom:12px;flex-wrap:wrap}
+  .listhead h2{margin:0}
+  .listhead .count{color:var(--muted);font-size:13.5px}
+  .listhead .search{margin-left:auto;max-width:220px;padding:8px 12px;font-size:14px}
+  .day{margin-bottom:18px}
+  .dayhead{display:flex;align-items:baseline;gap:10px;padding:0 4px 8px;border-bottom:2px solid var(--ink);margin-bottom:10px}
+  .dayhead .dname{font-family:Fraunces,Georgia,serif;font-size:18px;font-weight:650;text-transform:capitalize}
+  .dayhead .tag{font-size:11.5px;font-weight:600;text-transform:uppercase;letter-spacing:.05em;padding:2px 8px;border-radius:999px;background:var(--accent);color:#fff}
+  .dayhead .tag.fer{background:var(--accent-soft);color:var(--accent)}
+  .dayhead .tot{margin-left:auto;color:var(--muted);font-size:13px}
+  .res{display:grid;grid-template-columns:68px 1fr auto;gap:14px;align-items:start;background:var(--card);border:1px solid var(--line);border-radius:12px;padding:12px 14px;margin-bottom:8px}
+  .res .hr{font-family:Fraunces,Georgia,serif;font-size:21px;font-weight:650;line-height:1.1}
+  .res .name{font-weight:600;font-size:16px}
+  .res .meta{display:flex;gap:8px;flex-wrap:wrap;margin-top:4px;font-size:13px;color:var(--muted);align-items:center}
+  .pill{font-size:12px;font-weight:600;padding:2px 9px;border-radius:999px}
+  .pill.b{background:var(--bday-soft);color:var(--bday)} .pill.c{background:var(--carta-soft);color:var(--carta)}
+  .res .obs{margin-top:7px;font-size:13.5px;background:var(--bg);border-radius:8px;padding:6px 9px;white-space:pre-wrap;word-break:break-word}
+  .res .ops{display:flex;flex-direction:column;gap:4px}
+  .res .ops button{padding:4px 9px;font-size:12.5px;background:transparent;border:1px solid var(--line);color:var(--muted)}
+  .res .ops button.del{color:var(--danger)}
+  .res .ops button.yes{background:var(--danger);color:#fff;border-color:var(--danger)}
+  .tabs{display:inline-flex;gap:4px;background:var(--card);border:1px solid var(--line);padding:4px;border-radius:12px}
+  .tabs button{padding:7px 14px;font-size:14px;background:transparent;color:var(--muted);border-radius:9px}
+  .tabs button.on{background:var(--ink);color:#fff}
+  .pill.ok{background:var(--carta-soft);color:var(--carta)} .pill.no{background:#f6e0dc;color:var(--danger)} .pill.pend{background:var(--accent-soft);color:var(--accent)}
+  .res.st-asistio{border-left:4px solid var(--carta)} .res.st-cancelo{border-left:4px solid var(--danger);opacity:.8}
+  .res.st-cancelo .name{text-decoration:line-through}
+  .res .ops button.mk-ok.on{background:var(--carta);color:#fff;border-color:var(--carta)}
+  .res .ops button.mk-no.on{background:var(--danger);color:#fff;border-color:var(--danger)}
+  .empty{color:var(--muted);text-align:center;padding:40px 10px}
+  .status{color:var(--muted);font-size:13.5px;padding:8px 4px}
+  .editing{outline:2px solid var(--accent);outline-offset:1px}
+  @media (max-width:820px){
+    header{padding:18px 16px 4px}
+    main{grid-template-columns:1fr;padding:12px 16px 30px}
+    #formCol{position:static}
+    .listhead .search{max-width:none;width:100%;margin-left:0}
+  }
+</style>
+</head>
+<body>
+<header>
+  <h1>Reservas</h1>
+  <span class="sub">Nohel Coffee House</span>
+  <span class="ro-note" id="roNote">Solo lectura</span>
+  <button type="button" class="ghost authbtn" id="authBtn" hidden>Ingresar</button>
+</header>
+
+<main id="main" class="readonly">
+  <section id="formCol" class="panel">
+    <h2 id="formTitle">Nueva reserva</h2>
+    <form id="form" autocomplete="off">
+      <label for="nombre">Nombre de la reserva</label>
+      <input id="nombre" required maxlength="80" placeholder="Ej: Martina López">
+
+      <div class="row">
+        <div>
+          <label for="fecha">Día</label>
+          <input id="fecha" type="date" required>
+        </div>
+        <div>
+          <label for="hora">Hora de llegada</label>
+          <select id="hora" required><option value="">Elegí el día</option></select>
+        </div>
+      </div>
+      <div class="hint" id="dayHint"></div>
+
+      <label for="personas">Cantidad de personas</label>
+      <input id="personas" type="number" min="1" max="200" required placeholder="Ej: 4" inputmode="numeric">
+
+      <label>Menú</label>
+      <div class="seg">
+        <input type="radio" name="tipo" id="tCarta" value="carta" checked><label for="tCarta" class="c">A la carta</label>
+        <input type="radio" name="tipo" id="tCumple" value="cumple"><label for="tCumple" class="b">Menú cumpleaños</label>
+      </div>
+
+      <label for="obs">Observaciones</label>
+      <textarea id="obs" maxlength="600" placeholder="Opcional: alergias, torta, mesa afuera…"></textarea>
+
+      <div class="actions">
+        <button type="submit" class="primary" id="saveBtn">Guardar reserva</button>
+        <button type="button" class="ghost" id="cancelBtn" hidden>Cancelar</button>
+      </div>
+      <div class="msg" id="msg"></div>
+    </form>
+
+    <details class="fer">
+      <summary>Feriados (horario de 8 a 16)</summary>
+      <ul class="ferlist" id="ferList"></ul>
+      <div class="feradd">
+        <input type="date" id="ferFecha" aria-label="Fecha del feriado">
+        <input id="ferNombre" placeholder="Nombre" maxlength="60" aria-label="Nombre del feriado">
+        <button type="button" id="ferAdd">Agregar</button>
+      </div>
+    </details>
+  </section>
+
+  <section>
+    <div class="listhead">
+      <div class="tabs" role="tablist">
+        <button type="button" id="tabProx" class="on" role="tab">Próximas</button>
+        <button type="button" id="tabPas" role="tab">Pasadas</button>
+      </div>
+      <span class="count" id="count"></span>
+      <input class="search" id="search" placeholder="Buscar por nombre…" aria-label="Buscar">
+    </div>
+    <div id="status" class="status">Cargando reservas…</div>
+    <div id="list"></div>
+  </section>
+</main>
+
+<script type="module">
+// ============ CONFIGURACIÓN DE FIREBASE ============
+// Pegá acá los datos de tu proyecto (Firebase > Configuración del proyecto > Tus apps > Web).
+const firebaseConfig = {
+  apiKey: "AIzaSyCK20xoej7Okb3NXu-HDTvm8AAVrhW5P-s",
+  authDomain: "nohel-reservas.firebaseapp.com",
+  projectId: "nohel-reservas",
+  storageBucket: "nohel-reservas.firebasestorage.app",
+  messagingSenderId: "1083960261804",
+  appId: "1:1083960261804:web:5ed8826939c6edbc123309"
+};
+// ===================================================
+
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
+import { getFirestore, collection, doc, setDoc, updateDoc, deleteDoc, onSnapshot } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+import { getAuth, GoogleAuthProvider, signInWithPopup, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
+
+(function(){
+  const $ = id => document.getElementById(id);
+  const DIAS = ["domingo","lunes","martes","miércoles","jueves","viernes","sábado"];
+  const MESES = ["enero","febrero","marzo","abril","mayo","junio","julio","agosto","septiembre","octubre","noviembre","diciembre"];
+
+  let db = null, isOwner = false;
+  let reservas = [];           // {id, nombre, fecha, hora, personas, tipo, obs}
+  let feriados = [];           // {fecha, nombre}
+  let editingId = null, confirmId = null;
+
+  const pad = n => String(n).padStart(2,"0");
+  const todayStr = () => { const d = new Date(); return d.getFullYear()+"-"+pad(d.getMonth()+1)+"-"+pad(d.getDate()); };
+  const parse = s => { const [y,m,d] = s.split("-").map(Number); return new Date(y,m-1,d); };
+  const addDays = (s,n) => { const d = parse(s); d.setDate(d.getDate()+n); return d.getFullYear()+"-"+pad(d.getMonth()+1)+"-"+pad(d.getDate()); };
+  const feriadoDe = s => feriados.find(f => f.fecha === s);
+  const esCorto = s => { const w = parse(s).getDay(); return w === 0 || w === 6 || !!feriadoDe(s); };
+
+  function slots(s){
+    const fin = esCorto(s) ? 16 : 20, out = [];
+    for (let h = 8; h < fin; h++) for (let m = 0; m < 60; m += 15) out.push(pad(h)+":"+pad(m));
+    if (fin === 16) out.push("16:00");
+    return out;
+  }
+  function fechaLarga(s){
+    const d = parse(s);
+    return DIAS[d.getDay()] + " " + d.getDate() + " de " + MESES[d.getMonth()] + (d.getFullYear() !== new Date().getFullYear() ? " de " + d.getFullYear() : "");
+  }
+
+  // ---------- form ----------
+  function fillHoras(keep){
+    const f = $("fecha").value, sel = $("hora");
+    sel.innerHTML = "";
+    if (!f){ sel.innerHTML = '<option value="">Elegí el día</option>'; $("dayHint").textContent = ""; return; }
+    const opts = slots(f);
+    sel.appendChild(new Option("Elegí la hora",""));
+    opts.forEach(h => sel.appendChild(new Option(h + " hs", h)));
+    if (keep && opts.includes(keep)) sel.value = keep;
+    const fer = feriadoDe(f), w = parse(f).getDay();
+    const dn = DIAS[w][0].toUpperCase() + DIAS[w].slice(1);
+    $("dayHint").textContent = fer ? `${dn} · Feriado (${fer.nombre}) · de 8 a 16 hs`
+      : (w===0||w===6) ? `${dn} · fin de semana · de 8 a 16 hs` : `${dn} · de 8 a 20 hs`;
+  }
+  $("fecha").addEventListener("change", () => fillHoras($("hora").value));
+  $("fecha").min = todayStr();
+
+  function setMsg(t, kind){ const m = $("msg"); m.textContent = t || ""; m.className = "msg" + (kind ? " " + kind : ""); }
+
+  function resetForm(){
+    $("form").reset(); editingId = null; $("tCarta").checked = true;
+    $("formTitle").textContent = "Nueva reserva"; $("saveBtn").textContent = "Guardar reserva";
+    $("cancelBtn").hidden = true; fillHoras(); render();
+  }
+  $("cancelBtn").addEventListener("click", () => { resetForm(); setMsg(""); });
+
+  $("form").addEventListener("submit", async e => {
+    e.preventDefault();
+    if (!db || !isOwner) return;
+    const data = {
+      nombre: $("nombre").value.trim(),
+      fecha: $("fecha").value,
+      hora: $("hora").value,
+      personas: parseInt($("personas").value, 10),
+      tipo: document.querySelector('input[name="tipo"]:checked').value,
+      obs: $("obs").value.trim()
+    };
+    if (!data.nombre || !data.fecha || !data.hora || !(data.personas > 0)) { setMsg("Completá nombre, día, hora y cantidad de personas.", "err"); return; }
+    if (!editingId && data.fecha < todayStr()) { setMsg("Ese día ya pasó.", "err"); return; }
+    if (!slots(data.fecha).includes(data.hora)) { setMsg("Esa hora está fuera del horario de ese día.", "err"); return; }
+    $("saveBtn").disabled = true;
+    try {
+      if (editingId) {
+        const prev = reservas.find(r => r.id === editingId) || {};
+        await setDoc(doc(db,"reservas",editingId), { ...data, estado: prev.estado || "pendiente", creado: prev.creado || Date.now(), editado: Date.now() });
+        setMsg("Reserva actualizada.", "ok");
+      } else {
+        await setDoc(doc(collection(db,"reservas")), { ...data, estado: "pendiente", creado: Date.now() });
+        setMsg(`Reserva guardada: ${data.nombre}, ${fechaLarga(data.fecha)} a las ${data.hora}.`, "ok");
+      }
+      resetForm();
+    } catch (err) {
+      if (denied(err)) return;
+      setMsg(err && err.code === "resource-exhausted" ? "Se llenó el espacio de la base: borrá reservas viejas." : "No se pudo guardar. Probá de nuevo.", "err");
+    } finally { $("saveBtn").disabled = false; }
+  });
+
+  function startEdit(id){
+    const r = reservas.find(x => x.id === id); if (!r) return;
+    editingId = id; confirmId = null;
+    $("nombre").value = r.nombre || ""; $("fecha").value = r.fecha; fillHoras(r.hora);
+    $("personas").value = r.personas || ""; $("obs").value = r.obs || "";
+    (r.tipo === "cumple" ? $("tCumple") : $("tCarta")).checked = true;
+    $("formTitle").textContent = "Editar reserva"; $("saveBtn").textContent = "Guardar cambios";
+    $("cancelBtn").hidden = false; setMsg("");
+    render();
+    $("formCol").scrollIntoView({ behavior: "smooth", block: "start" });
+    $("nombre").focus({ preventScroll: true });
+  }
+  async function remove(id){
+    try { await deleteDoc(doc(db,"reservas",id)); if (editingId === id) resetForm(); }
+    catch { setMsg("No se pudo borrar. Probá de nuevo.", "err"); }
+  }
+
+  // ---------- list ----------
+  function el(tag, cls, text){ const e = document.createElement(tag); if (cls) e.className = cls; if (text != null) e.textContent = text; return e; }
+
+  let tab = "prox";
+  function setTab(t){
+    tab = t; confirmId = null;
+    $("tabProx").classList.toggle("on", t === "prox");
+    $("tabPas").classList.toggle("on", t === "pas");
+    render();
+  }
+  $("tabProx").addEventListener("click", () => setTab("prox"));
+  $("tabPas").addEventListener("click", () => setTab("pas"));
+
+  async function setEstado(r, estado){
+    const nuevo = r.estado === estado ? "pendiente" : estado;
+    try { await updateDoc(doc(db,"reservas",r.id), { estado: nuevo }); }
+    catch (err) { if (denied(err)) return; setMsg("No se pudo actualizar el estado. Probá de nuevo.", "err"); }
+  }
+
+  function render(){
+    const list = $("list"); list.innerHTML = "";
+    const hoy = todayStr(), man = addDays(hoy,1);
+    const q = $("search").value.trim().toLowerCase();
+    const pas = tab === "pas";
+    const prox = reservas
+      .filter(r => (pas ? r.fecha < hoy : r.fecha >= hoy) && (!q || (r.nombre||"").toLowerCase().includes(q)))
+      .sort((a,b) => pas ? (b.fecha+a.hora).localeCompare(a.fecha+b.hora) : (a.fecha+a.hora).localeCompare(b.fecha+b.hora));
+    const pers = prox.reduce((s,r) => s + (r.personas||0), 0);
+    if (pas) {
+      const vin = prox.filter(r => r.estado === "asistio").length, can = prox.filter(r => r.estado === "cancelo").length;
+      const sin = prox.length - vin - can;
+      $("count").textContent = prox.length ? `${vin} vinieron · ${can} cancelaron · ${sin} sin confirmar` : "";
+    } else {
+      $("count").textContent = prox.length ? `${prox.length} ${prox.length===1?"reserva":"reservas"} · ${pers} personas` : "";
+    }
+    if (!prox.length) {
+      if ($("status").hidden) list.appendChild(el("div","empty", q ? "No hay reservas con ese nombre." : (pas ? "Todavía no hay reservas pasadas." : "No hay reservas próximas.")));
+      return;
+    }
+    const byDay = {};
+    prox.forEach(r => (byDay[r.fecha] = byDay[r.fecha] || []).push(r));
+    Object.keys(byDay).forEach(f => {
+      const items = byDay[f], day = el("div","day"), head = el("div","dayhead");
+      head.appendChild(el("span","dname", fechaLarga(f)));
+      if (f === hoy) head.appendChild(el("span","tag","Hoy"));
+      else if (f === man) head.appendChild(el("span","tag","Mañana"));
+      const fer = feriadoDe(f); if (fer) head.appendChild(el("span","tag fer","Feriado"));
+      const p = items.reduce((s,r) => s + (r.personas||0), 0);
+      head.appendChild(el("span","tot", `${items.length} ${items.length===1?"reserva":"reservas"} · ${p} pers.`));
+      day.appendChild(head);
+      items.forEach(r => {
+        const est = r.estado === "asistio" || r.estado === "cancelo" ? r.estado : "pendiente";
+        const card = el("div","res st-" + est + (r.id === editingId ? " editing" : ""));
+        card.appendChild(el("div","hr", r.hora));
+        const body = el("div");
+        body.appendChild(el("div","name", r.nombre));
+        const meta = el("div","meta");
+        meta.appendChild(el("span", null, `${r.personas} ${r.personas==1?"persona":"personas"}`));
+        meta.appendChild(el("span","pill " + (r.tipo==="cumple"?"b":"c"), r.tipo==="cumple" ? "Menú cumpleaños" : "A la carta"));
+        if (est === "asistio") meta.appendChild(el("span","pill ok","Vino"));
+        else if (est === "cancelo") meta.appendChild(el("span","pill no","Canceló"));
+        else if (pas) meta.appendChild(el("span","pill pend","Sin confirmar"));
+        body.appendChild(meta);
+        if (r.obs) body.appendChild(el("div","obs", r.obs));
+        card.appendChild(body);
+        const ops = el("div","ops");
+        if (isOwner) {
+          if (confirmId === r.id) {
+            const y = el("button","yes","Borrar"); y.onclick = () => { confirmId = null; remove(r.id); };
+            const n = el("button",null,"No"); n.onclick = () => { confirmId = null; render(); };
+            ops.append(y, n);
+          } else {
+            const ok = el("button","mk-ok" + (est==="asistio"?" on":""), "✓ Vino"); ok.onclick = () => setEstado(r, "asistio");
+            const no = el("button","mk-no" + (est==="cancelo"?" on":""), "✕ Canceló"); no.onclick = () => setEstado(r, "cancelo");
+            const ed = el("button",null,"Editar"); ed.onclick = () => startEdit(r.id);
+            const de = el("button","del","Borrar"); de.onclick = () => { confirmId = r.id; render(); };
+            ops.append(ok, no, ed, de);
+          }
+        }
+        card.appendChild(ops);
+        day.appendChild(card);
+      });
+      list.appendChild(day);
+    });
+  }
+  $("search").addEventListener("input", render);
+
+  // ---------- feriados ----------
+  function renderFer(){
+    const ul = $("ferList"); ul.innerHTML = "";
+    const hoy = todayStr();
+    const fut = feriados.filter(f => f.fecha >= hoy).sort((a,b) => a.fecha.localeCompare(b.fecha));
+    if (!fut.length) { ul.appendChild(el("li", null, "Sin feriados cargados.")); return; }
+    fut.forEach(f => {
+      const li = el("li"); const d = parse(f.fecha);
+      li.appendChild(el("span", null, `${pad(d.getDate())}/${pad(d.getMonth()+1)}/${d.getFullYear()} · ${f.nombre}`));
+      if (isOwner) { const b = el("button", null, "Quitar"); b.onclick = () => saveFer(feriados.filter(x => x.fecha !== f.fecha)); li.appendChild(b); }
+      ul.appendChild(li);
+    });
+  }
+  async function saveFer(list){
+    try { await setDoc(doc(db,"config","feriados"), { fechas: list }); }
+    catch (err) { if (denied(err)) return; setMsg("No se pudo actualizar los feriados.", "err"); }
+  }
+  $("ferAdd").addEventListener("click", () => {
+    const f = $("ferFecha").value, n = $("ferNombre").value.trim() || "Feriado";
+    if (!f || !db) return;
+    saveFer(feriados.filter(x => x.fecha !== f).concat([{ fecha: f, nombre: n }]));
+    $("ferFecha").value = ""; $("ferNombre").value = "";
+  });
+
+  // ---------- boot ----------
+  const FERIADOS_INICIALES = [
+    {fecha:"2026-11-23",nombre:"Soberanía Nacional"},{fecha:"2026-12-07",nombre:"Día no laborable"},
+    {fecha:"2026-12-08",nombre:"Inmaculada Concepción"},{fecha:"2026-12-25",nombre:"Navidad"},
+    {fecha:"2027-01-01",nombre:"Año Nuevo"},{fecha:"2027-02-08",nombre:"Carnaval"},{fecha:"2027-02-09",nombre:"Carnaval"},
+    {fecha:"2027-03-24",nombre:"Día de la Memoria"},{fecha:"2027-03-26",nombre:"Viernes Santo"},
+    {fecha:"2027-04-02",nombre:"Malvinas"},{fecha:"2027-05-25",nombre:"Revolución de Mayo"},
+    {fecha:"2027-07-09",nombre:"Día de la Independencia"},{fecha:"2027-12-08",nombre:"Inmaculada Concepción"},
+    {fecha:"2027-12-25",nombre:"Navidad"}
+  ];
+  let auth = null, ferLoaded = false, ferExists = true;
+
+  function denied(err){
+    if (err && err.code === "permission-denied") {
+      setMsg("Esta cuenta no tiene permiso para cargar reservas.", "err");
+      return true;
+    }
+    return false;
+  }
+  function setOwner(v){
+    isOwner = v;
+    $("main").classList.toggle("readonly", !isOwner);
+    $("roNote").style.display = isOwner ? "none" : "inline-block";
+    $("authBtn").textContent = isOwner ? "Salir" : "Ingresar";
+    renderFer(); render();
+  }
+  async function maybeSeedFer(){
+    if (isOwner && ferLoaded && !ferExists) {
+      ferExists = true;
+      try { await setDoc(doc(db,"config","feriados"), { fechas: FERIADOS_INICIALES }); } catch (err) { denied(err); }
+    }
+  }
+
+  function boot(){
+    if (firebaseConfig.apiKey === "PEGAR_AQUI") {
+      $("status").textContent = "Falta pegar la configuración de Firebase en index.html.";
+      return;
+    }
+    const app = initializeApp(firebaseConfig);
+    db = getFirestore(app);
+    auth = getAuth(app);
+
+    $("authBtn").hidden = false;
+    $("authBtn").addEventListener("click", async () => {
+      try {
+        if (auth.currentUser) await signOut(auth);
+        else await signInWithPopup(auth, new GoogleAuthProvider());
+      } catch (err) { /* popup cerrado */ }
+    });
+    onAuthStateChanged(auth, u => { setOwner(!!u); maybeSeedFer(); });
+
+    let timer = setTimeout(() => { $("status").hidden = false; $("status").textContent = "Las reservas tardan en cargar; revisá tu conexión."; }, 10000);
+    onSnapshot(collection(db,"reservas"), snap => {
+      clearTimeout(timer); $("status").hidden = true;
+      reservas = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+      if (confirmId && !reservas.some(r => r.id === confirmId)) confirmId = null;
+      render();
+    }, err => {
+      clearTimeout(timer); $("status").hidden = false;
+      $("status").textContent = "No se pudieron cargar las reservas.";
+    });
+    onSnapshot(doc(db,"config","feriados"), snap => {
+      ferLoaded = true; ferExists = snap.exists();
+      const d = snap.exists() ? snap.data() : null;
+      feriados = (d && Array.isArray(d.fechas)) ? d.fechas.filter(f => f && f.fecha) : [];
+      renderFer(); fillHoras($("hora").value); render();
+      maybeSeedFer();
+    }, () => {});
+  }
+  fillHoras(); renderFer(); boot();
+})();
+</script>
+</body>
+</html>
